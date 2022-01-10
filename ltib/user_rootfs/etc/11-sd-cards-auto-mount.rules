@@ -1,0 +1,21 @@
+#KERNEL!="mmcblk1p[0-9]", GOTO="sd_cards_auto_mount_end"
+
+# Global mount options
+ACTION=="add", ENV{mount_options}="relatime"
+# Filesystem specific options
+ACTION=="add", IMPORT{program}="/sbin/blkid -o udev -p %N"
+ACTION=="add", ENV{ID_FS_TYPE}=="vfat|ntfs", ENV{mount_options}="$env{mount_options},utf8,gid=100,umask=002"
+
+#ACTION=="add", RUN+="/bin/mkdir -p /media/sd-%k", RUN+="/bin/ln -s /media/sd-%k /mnt/sd-%k", RUN+="/bin/mount -o $env{mount_options} /dev/%k /media/sd-%k"
+#ACTION=="remove", RUN+="/bin/umount -l /media/sd-%k", RUN+="/bin/rmdir /media/sd-%k"
+#LABEL="sd_cards_auto_mount_end"
+
+ACTION=="add", KERNEL=="mmcblk1[a-z][0-9]", RUN+="/bin/mkdir -p /mnt/sdcard"
+ACTION=="add", KERNEL=="mmcblk1[a-z][0-9]", RUN+="/bin/mount -o $env{mount_options} /dev/mmcblk1p1 /mnt/sdcard"
+ACTION=="remove", RUN+="/bin/umount -l /mnt/sdcard"
+ACTION=="remove", RUN+="/bin/rm -r /mnt/sdcard"
+
+ACTION=="add", KERNEL=="sd[a-z][0-9]", RUN+="/bin/mkdir -p /usb"
+ACTION=="add", KERNEL=="sd[a-z][0-9]", RUN+="/bin/mount -o $env{mount_options} /dev/sda1 /mnt/usb"
+ACTION=="remove", RUN+="/bin/umount -l /mnt/usb"
+ACTION=="remove", RUN+="/bin/rm -r /mnt/usb"
